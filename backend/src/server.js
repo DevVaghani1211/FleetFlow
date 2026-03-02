@@ -6,6 +6,7 @@ import app from './app.js';
 const server = http.createServer(app);
 const allowedOrigins = [
     "http://localhost:5173",
+    "http://localhost:3000",
     "https://fleet-flow-amber.vercel.app"
 ];
 

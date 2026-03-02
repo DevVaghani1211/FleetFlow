@@ -105,6 +105,7 @@ app = FastAPI(
 
 allowed_origins = [
     "http://localhost:5173",
+    "http://localhost:3000",
     "https://fleet-flow-amber.vercel.app"
 ]
 
