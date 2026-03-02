@@ -22,10 +22,18 @@ const app = express();
 
 // Middleware
 app.use(helmet());
-const corsOptions = {
-    origin: process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',') : '*',
-};
-app.use(cors(corsOptions));
+const allowedOrigins = [
+    "http://localhost:5173",
+    "https://fleet-flow-amber.vercel.app"
+];
+
+app.use(cors({
+    origin: allowedOrigins,
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"]
+}));
+
 app.use(morgan('dev'));
 app.use(express.json());
 
