@@ -1,0 +1,170 @@
+import React, { useState, Suspense, Component } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { useAuth } from '../features/auth/AuthContext';
+import { Eye, EyeOff, Lock, Mail, Loader2, Navigation, User } from 'lucide-react';
+import Spline from '@splinetool/react-spline';
+
+class SplineErrorBoundary extends Component {
+    constructor(props) { super(props); this.state = { hasError: false }; }
+    static getDerivedStateFromError() { return { hasError: true }; }
+    render() {
+        if (this.state.hasError) return <div className="absolute inset-0 bg-gradient-to-br from-navy to-secondary opacity-50" />;
+        return this.props.children;
+    }
+}
+
+const SignUp = () => {
+    const [name, setName] = useState('');
+    const [email, setEmail] = useState('');
+    const [phone, setPhone] = useState('');
+    const [password, setPassword] = useState('');
+    const [role, setRole] = useState('DISPATCHER');
+    const [showPassword, setShowPassword] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [error, setError] = useState('');
+
+    const { signUp } = useAuth();
+    const navigate = useNavigate();
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setError('');
+        setIsSubmitting(true);
+        const result = await signUp(name, email, password, phone, role);
+        if (result.success) {
+            navigate('/');
+        } else {
+            setError(result.message);
+            setIsSubmitting(false);
+        }
+    };
+
+    return (
+        <div className="relative flex min-h-screen items-center justify-center bg-background overflow-hidden">
+            {/* Spline Background */}
+            <div className="absolute inset-0 z-0 opacity-30">
+                <SplineErrorBoundary>
+                    <Suspense fallback={<div className="h-full w-full bg-background" />}>
+                        <Spline scene="https://prod.spline.design/6Wq1Q7YGyH-9T9-n/scene.splinecode" />
+                    </Suspense>
+                </SplineErrorBoundary>
+            </div>
+
+            {/* Gradient overlay */}
+            <div className="absolute inset-0 z-0 bg-gradient-to-b from-background/50 via-transparent to-background/80" />
+
+            <div className="relative z-10 w-full max-w-md px-4 animate-fade-in">
+                <div className="overflow-hidden rounded-3xl glass-morphism shadow-[0_32px_64px_-16px_rgba(0,0,0,0.5)]">
+                    <div className="px-8 pt-10 pb-12">
+                        <div className="text-center mb-10">
+                            <div className="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 text-primary mb-4 ring-1 ring-primary/20">
+                                <Navigation size={32} />
+                            </div>
+                            <h2 className="text-3xl font-bold tracking-tight text-text-primary">Join FleetFlow</h2>
+                            <p className="mt-2 text-sm text-text-secondary">Create your fleet management account</p>
+                        </div>
+
+                        {error && (
+                            <div className="mb-6 rounded-xl bg-danger/10 p-4 text-sm text-danger border border-danger/20">
+                                {error}
+                            </div>
+                        )}
+
+                        <form onSubmit={handleSubmit} className="space-y-6">
+                            <div className="space-y-4">
+                                {/* Name */}
+                                <div>
+                                    <label className="block text-xs font-bold text-text-secondary uppercase tracking-wider mb-2 ml-1">Full Name</label>
+                                    <div className="relative group">
+                                        <div className="absolute inset-y-0 left-0 flex items-center pl-4 text-text-secondary group-focus-within:text-primary transition-colors">
+                                            <User size={18} />
+                                        </div>
+                                        <input type="text" required value={name} onChange={(e) => setName(e.target.value)}
+                                            placeholder="John Doe"
+                                            className="block w-full rounded-xl border-0 bg-background/60 pl-11 pr-4 py-3.5 text-text-primary ring-1 ring-inset ring-border placeholder:text-text-secondary/50 focus:ring-2 focus:ring-inset focus:ring-primary transition-all outline-none backdrop-blur-sm" />
+                                    </div>
+                                </div>
+
+                                {/* Email */}
+                                <div>
+                                    <label className="block text-xs font-bold text-text-secondary uppercase tracking-wider mb-2 ml-1">Email Address</label>
+                                    <div className="relative group">
+                                        <div className="absolute inset-y-0 left-0 flex items-center pl-4 text-text-secondary group-focus-within:text-primary transition-colors">
+                                            <Mail size={18} />
+                                        </div>
+                                        <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)}
+                                            placeholder="admin@fleetflow.com"
+                                            className="block w-full rounded-xl border-0 bg-background/60 pl-11 pr-4 py-3.5 text-text-primary ring-1 ring-inset ring-border placeholder:text-text-secondary/50 focus:ring-2 focus:ring-inset focus:ring-primary transition-all outline-none backdrop-blur-sm" />
+                                    </div>
+                                </div>
+
+                                {/* Phone */}
+                                <div>
+                                    <label className="block text-xs font-bold text-text-secondary uppercase tracking-wider mb-2 ml-1">Phone Number</label>
+                                    <div className="relative group">
+                                        <div className="absolute inset-y-0 left-0 flex items-center pl-4 text-text-secondary group-focus-within:text-primary transition-colors">
+                                            <svg xmlns="http://www.w3.org/2000/svg" size={18} width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-phone"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" /></svg>
+                                        </div>
+                                        <input type="tel" required value={phone} onChange={(e) => setPhone(e.target.value)}
+                                            placeholder="9913312353"
+                                            className="block w-full rounded-xl border-0 bg-background/60 pl-11 pr-4 py-3.5 text-text-primary ring-1 ring-inset ring-border placeholder:text-text-secondary/50 focus:ring-2 focus:ring-inset focus:ring-primary transition-all outline-none backdrop-blur-sm" />
+                                    </div>
+                                </div>
+
+                                {/* Password */}
+                                <div>
+                                    <label className="block text-xs font-bold text-text-secondary uppercase tracking-wider mb-2 ml-1">Password</label>
+                                    <div className="relative group">
+                                        <div className="absolute inset-y-0 left-0 flex items-center pl-4 text-text-secondary group-focus-within:text-primary transition-colors">
+                                            <Lock size={18} />
+                                        </div>
+                                        <input type={showPassword ? 'text' : 'password'} required value={password} onChange={(e) => setPassword(e.target.value)}
+                                            placeholder="••••••••"
+                                            className="block w-full rounded-xl border-0 bg-background/60 pl-11 pr-12 py-3.5 text-text-primary ring-1 ring-inset ring-border placeholder:text-text-secondary/50 focus:ring-2 focus:ring-inset focus:ring-primary transition-all outline-none backdrop-blur-sm" />
+                                        <button type="button" onClick={() => setShowPassword(!showPassword)}
+                                            className="absolute inset-y-0 right-0 flex items-center pr-4 text-text-secondary hover:text-text-primary transition-colors">
+                                            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {/* Role */}
+                                <div>
+                                    <label className="block text-xs font-bold text-text-secondary uppercase tracking-wider mb-2 ml-1">Operational Role</label>
+                                    <select value={role} onChange={(e) => setRole(e.target.value)}
+                                        className="block w-full rounded-xl border-0 bg-background/60 px-4 py-3.5 text-text-primary ring-1 ring-inset ring-border focus:ring-2 focus:ring-inset focus:ring-primary transition-all outline-none appearance-none cursor-pointer font-bold backdrop-blur-sm">
+                                        <option value="FLEET_MANAGER">Fleet Manager</option>
+                                        <option value="DISPATCHER">Dispatcher</option>
+                                        <option value="SAFETY_OFFICER">Safety Officer</option>
+                                        <option value="FINANCIAL_ANALYST">Financial Analyst</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <button type="submit" disabled={isSubmitting}
+                                className="group relative flex w-full justify-center rounded-xl bg-primary px-4 py-4 text-sm font-bold text-white shadow-xl shadow-primary/20 hover:bg-primary/90 hover:-translate-y-0.5 active:translate-y-0 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-all disabled:opacity-70 disabled:pointer-events-none overflow-hidden">
+                                {isSubmitting ? (
+                                    <Loader2 className="animate-spin" size={20} />
+                                ) : (
+                                    <>
+                                        <span className="relative z-10 font-bold uppercase tracking-widest">Create Account</span>
+                                        <div className="absolute inset-x-0 bottom-0 h-1 bg-white/20 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left" />
+                                    </>
+                                )}
+                            </button>
+                        </form>
+                    </div>
+
+                    <div className="bg-background/40 backdrop-blur-sm px-8 py-5 border-t border-border text-center">
+                        <p className="text-xs text-text-secondary font-medium">
+                            Already have an account?{' '}
+                            <Link to="/login" className="text-primary font-bold hover:underline">Log In</Link>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+export default SignUp;

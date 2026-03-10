@@ -1,0 +1,154 @@
+import React, { useState, Suspense, Component } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { useAuth } from '../features/auth/AuthContext';
+import { Eye, EyeOff, Lock, Mail, Loader2, Navigation } from 'lucide-react';
+import ForgotPassword from './ForgotPassword';
+import Spline from '@splinetool/react-spline';
+
+// Error Boundary for Spline to prevent app crash on React 19 incompatibility
+class SplineErrorBoundary extends Component {
+    constructor(props) { super(props); this.state = { hasError: false }; }
+    static getDerivedStateFromError() { return { hasError: true }; }
+    render() {
+        if (this.state.hasError) return <div className="absolute inset-0 bg-gradient-to-br from-navy to-secondary opacity-50" />;
+        return this.props.children;
+    }
+}
+
+const Login = () => {
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [error, setError] = useState('');
+    const [showForgot, setShowForgot] = useState(false);
+
+    const { login } = useAuth();
+    const navigate = useNavigate();
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setError('');
+        setIsSubmitting(true);
+        const result = await login(email, password);
+        if (result.success) {
+            navigate('/');
+        } else {
+            setError(result.message);
+            setIsSubmitting(false);
+        }
+    };
+
+    return (
+        <>
+            <div className="relative flex min-h-screen items-center justify-center bg-background overflow-hidden">
+                {/* Spline Background */}
+                <div className="absolute inset-0 z-0 opacity-30">
+                    <SplineErrorBoundary>
+                        <Suspense fallback={<div className="h-full w-full bg-background" />}>
+                            <Spline scene="https://prod.spline.design/6Wq1Q7YGyH-9T9-n/scene.splinecode" />
+                        </Suspense>
+                    </SplineErrorBoundary>
+                </div>
+
+                {/* Gradient overlay to blend Spline with theme */}
+                <div className="absolute inset-0 z-0 bg-gradient-to-b from-background/50 via-transparent to-background/80" />
+
+                <div className="relative z-10 w-full max-w-md px-4 animate-fade-in">
+                    <div className="overflow-hidden rounded-3xl glass-morphism shadow-[0_32px_64px_-16px_rgba(0,0,0,0.5)]">
+                        <div className="px-8 pt-10 pb-12">
+                            <div className="text-center mb-10">
+                                <div className="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 text-primary mb-4 ring-1 ring-primary/20">
+                                    <Navigation size={32} />
+                                </div>
+                                <h2 className="text-3xl font-bold tracking-tight text-text-primary">Welcome Back</h2>
+                                <p className="mt-2 text-sm text-text-secondary">Enterprise Fleet Management System</p>
+                            </div>
+
+                            {error && (
+                                <div className="mb-6 rounded-xl bg-danger/10 p-4 text-sm text-danger border border-danger/20">
+                                    {error}
+                                </div>
+                            )}
+
+                            <form onSubmit={handleSubmit} className="space-y-6">
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="block text-xs font-bold text-text-secondary uppercase tracking-wider mb-2 ml-1">Email Address</label>
+                                        <div className="relative group">
+                                            <div className="absolute inset-y-0 left-0 flex items-center pl-4 text-text-secondary group-focus-within:text-primary transition-colors">
+                                                <Mail size={18} />
+                                            </div>
+                                            <input
+                                                type="email" required value={email}
+                                                onChange={(e) => setEmail(e.target.value)}
+                                                placeholder="admin@fleetflow.com"
+                                                className="block w-full rounded-xl border-0 bg-background/60 pl-11 pr-4 py-3.5 text-text-primary ring-1 ring-inset ring-border placeholder:text-text-secondary/50 focus:ring-2 focus:ring-inset focus:ring-primary transition-all outline-none backdrop-blur-sm"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-xs font-bold text-text-secondary uppercase tracking-wider mb-2 ml-1">Password</label>
+                                        <div className="relative group">
+                                            <div className="absolute inset-y-0 left-0 flex items-center pl-4 text-text-secondary group-focus-within:text-primary transition-colors">
+                                                <Lock size={18} />
+                                            </div>
+                                            <input
+                                                type={showPassword ? 'text' : 'password'}
+                                                required value={password}
+                                                onChange={(e) => setPassword(e.target.value)}
+                                                placeholder="••••••••"
+                                                className="block w-full rounded-xl border-0 bg-background/60 pl-11 pr-12 py-3.5 text-text-primary ring-1 ring-inset ring-border placeholder:text-text-secondary/50 focus:ring-2 focus:ring-inset focus:ring-primary transition-all outline-none backdrop-blur-sm"
+                                            />
+                                            <button type="button" onClick={() => setShowPassword(!showPassword)}
+                                                className="absolute inset-y-0 right-0 flex items-center pr-4 text-text-secondary hover:text-text-primary transition-colors">
+                                                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="flex items-center justify-between px-1">
+                                    <div className="flex items-center gap-2">
+                                        <input type="checkbox" id="remember"
+                                            className="h-4 w-4 rounded border-border bg-background checked:bg-primary text-primary focus:ring-primary transition-colors" />
+                                        <label htmlFor="remember" className="text-sm text-text-secondary cursor-pointer">Remember me</label>
+                                    </div>
+                                    <button type="button" onClick={() => setShowForgot(true)}
+                                        className="text-sm font-semibold text-primary hover:text-primary/80 transition-colors outline-none">
+                                        Forgot password?
+                                    </button>
+                                </div>
+
+                                <button type="submit" disabled={isSubmitting}
+                                    className="group relative flex w-full justify-center rounded-xl bg-primary px-4 py-4 text-sm font-bold text-white shadow-xl shadow-primary/20 hover:bg-primary/90 hover:-translate-y-0.5 active:translate-y-0 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-all disabled:opacity-70 disabled:pointer-events-none overflow-hidden">
+                                    {isSubmitting ? (
+                                        <Loader2 className="animate-spin" size={20} />
+                                    ) : (
+                                        <>
+                                            <span className="relative z-10 font-bold uppercase tracking-widest">Authorize Access</span>
+                                            <div className="absolute inset-x-0 bottom-0 h-1 bg-white/20 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left" />
+                                        </>
+                                    )}
+                                </button>
+                            </form>
+                        </div>
+
+                        <div className="bg-background/40 backdrop-blur-sm px-8 py-5 border-t border-border text-center">
+                            <p className="text-xs text-text-secondary font-medium uppercase tracking-tighter mb-1">Powered by FleetFlow Logistics Engine v1.0</p>
+                            <p className="text-xs text-text-secondary font-medium">
+                                Don't have an account?{' '}
+                                <Link to="/signup" className="text-primary font-bold hover:underline">Sign Up</Link>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {showForgot && <ForgotPassword onClose={() => setShowForgot(false)} />}
+        </>
+    );
+};
+
+export default Login;
